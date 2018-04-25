@@ -1,8 +1,10 @@
 let fs = require('fs');
 let readline = require('readline');
-let minDistance = 600;
+let minDistance = 200;
 
 let stack = [];
+let last = 0;
+let deltas = [];
 
 let inputFile = process.argv[2];
 
@@ -11,6 +13,13 @@ let lineReader = readline.createInterface({
   });
   
   lineReader.on('line', processLine);
+  lineReader.on('close', function () {
+      let sum = 0;
+      for (let i=0; i<deltas.length; i++) {
+          sum += deltas[i];
+      }
+      //console.log(sum/deltas.length);
+  })
 
 function processLine (line) {
     let lineArr = line.split(',');
@@ -22,6 +31,16 @@ function processLine (line) {
 }
 
 function processReading (data) {
+    if (!last) {
+        last = data.time;
+    }
+    else {
+        let delta = data.time - last;
+        last = data.time;
+        if (delta<minDistance) {
+            deltas.push(delta);
+        }
+    }
     // New, individual reading
     if (stack.length>0 && data.time>0 && data.time  - stack[stack.length-1].time > minDistance) {
         if (data.time >= 1524323342585) {
@@ -31,7 +50,7 @@ function processReading (data) {
     }
     if (data.time && data.speed >= 30) {
         if (data.speed > 90) {
-            console.log(data);
+           // console.log(data);
         }
         stack.push(data);
     }
@@ -89,8 +108,7 @@ function processStack() {
     for (let i=0;i<stack.length; i++) {
         let current = stack[i];
         if (anomalies[i]) {
-
-            // console.log("Anomaly weeded out: ", current);
+            console.log("Anomaly weeded out: ", current);
         }
         else {
             if (current.speed > max) {
@@ -100,12 +118,12 @@ function processStack() {
         }
     }
     if (!when) {
-        console.log("NO RELIABLE READING!")
+        //console.log("NO RELIABLE READING!")
         return;
     }
     if (anomalyCount>0) {
         let date = new Date(when);
-       // console.log('MAX: ', max, " at ", date.toISOString() , " in direction ", dominantDirection);
+       // console.log(date.toISOString()+','+max+","+dominantDirection);
         // console.log("\nAnomalies: ", anomalies);
         // console.log(stack);
         // console.log("\n\n")
