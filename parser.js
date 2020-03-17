@@ -108,7 +108,7 @@ function processStack() {
     for (let i=0;i<stack.length; i++) {
         let current = stack[i];
         if (anomalies[i]) {
-            console.log("Anomaly weeded out: ", current);
+           // console.log("Anomaly weeded out: ", current);
         }
         else {
             if (current.speed > max) {
